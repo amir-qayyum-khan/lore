@@ -57,3 +57,8 @@ class Repository(models.Model):
     description = models.TextField()
     create_date = models.DateField(auto_now_add=True)
     created_by = models.ForeignKey(User)
+
+    class Meta:
+        # pylint: disable=no-init,missing-docstring
+        # pylint: disable=old-style-class,too-few-public-methods
+        unique_together = (('name', 'created_by'),)

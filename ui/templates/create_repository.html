@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>create repository</h1>
+<form method="post" action="{% url 'create_repository' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Create Repository" />
+</form>
+{% endblock %}

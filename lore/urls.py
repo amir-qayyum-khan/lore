@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-
+import learningresources.urls as lr_urls
 import importer.urls as importer_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^importer/', include(importer_urls)),
+    url(r'^repository/', include(lr_urls)),
 ]

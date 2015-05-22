@@ -101,3 +101,28 @@ def type_id_by_name(name):
     obj, _ = LearningResourceType.objects.get_or_create(name=name.lower())
     TYPE_LOOKUP[name] = obj.id
     return obj.id
+
+def create_repository(name, description, user):
+    """
+    Create a repository.
+
+    Args:
+        name: repository name
+        description: description of the repository
+        user: app user
+    Returns:
+        repository id if repository was created
+        None if repository exists with (name, user) tuple
+    """
+    params = {
+        'name':name,
+        'description':description,
+        'created_by': user,
+        'create_date':datetime.now(),
+    }
+    repo = Repository(**params)
+    try:
+        repo.save()
+    except IntegrityError:
+        return None
+    return repo.id
