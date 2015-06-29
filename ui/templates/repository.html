@@ -56,6 +56,10 @@
   </div>
 </div>
 {% include "includes/resource_panel.html" %}
+{% if 'manage_repo_users' in perms_on_cur_repo %}
+	  {% include "includes/members_panel.html" %}
+{% endif %}
+
 {% endblock %}
 {% block postcontent %}
 {{ block.super }}
