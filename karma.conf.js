@@ -16,6 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'ui/jstests/test-listing.js',
+      'ui/static/ui/js/listing.js',
       {
         pattern: 'ui/static/bower/react/react.js',
         included: false

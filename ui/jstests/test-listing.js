@@ -18,10 +18,21 @@ require.config({
 
   // paths for required libraries
   paths: {
-    QUnit: 'node_modules/qunitjs/qunit/qunit',
-    react: 'ui/static/bower/react/react'
+    'QUnit': 'node_modules/qunitjs/qunit/qunit',
+    'react': 'ui/static/bower/react/react',
+    'listing': 'ui/static/ui/js/listing.js'
   },
 
   // we have to kickoff karma, as it is asynchronous
   callback: window.__karma__.start
 });
+
+require(['QUnit', 'listing', 'jquery'], function(QUnit, listing) {
+  'use strict';
+  QUnit.test('test formatGroupName', function(assert) {
+    //assert.equal(listing.formatGroupName('hello'), 'hello');
+    assert.ok(listing.formatGroupName('hello'));
+    console.log('Hello');
+  });
+});
+
