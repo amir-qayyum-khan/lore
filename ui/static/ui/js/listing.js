@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'icheck', 'csrf'], function(jQuery) {
+define(['jquery'], function(jQuery) {
   'use strict';
 
   /* global $ */
@@ -215,4 +215,13 @@ define(['jquery', 'bootstrap', 'icheck', 'csrf'], function(jQuery) {
       });
     });
   });
+
+  return {
+    formatGroupName: formatGroupName,
+    formatUserGroups: formatUserGroups,
+    isMITEmail:isMITEmail,
+    resetUserGroupForm:resetUserGroupForm,
+    showMembersAlert:showMembersAlert,
+    showUpdateAllMembers:showUpdateAllMembers
+  };
 });

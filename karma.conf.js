@@ -11,12 +11,11 @@ module.exports = function(config) {
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     // phantom-js doesn't support function.bind in 1.x so we need the shim
-    frameworks: ['phantomjs-shim', 'requirejs', 'qunit'],
+    frameworks: ['phantomjs-shim', 'requirejs', 'qunit', 'jquery'],
 
     // list of files / patterns to load in the browser
     files: [
       'ui/jstests/test-listing.js',
-      'ui/static/ui/js/listing.js',
       {
         pattern: 'ui/static/bower/react/react.js',
         included: false

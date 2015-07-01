@@ -20,6 +20,7 @@
     "phantomjs": "^1.9.17",
     "qunit": "^0.7.6",
     "qunitjs": "^1.18.0",
-    "requirejs": "^2.1.18"
+    "requirejs": "^2.1.18",
+    "karma-jquery": ">= 0.1.0"
   }
 }
