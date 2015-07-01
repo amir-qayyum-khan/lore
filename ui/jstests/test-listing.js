@@ -27,7 +27,7 @@ require.config({
   callback: window.__karma__.start
 });
 
-require(['QUnit', 'listing', 'jquery'], function(QUnit, listing) {
+require(['QUnit', 'listing' ], function(QUnit, listing) {
   'use strict';
   QUnit.test('test formatGroupName', function(assert) {
     //assert.equal(listing.formatGroupName('hello'), 'hello');
