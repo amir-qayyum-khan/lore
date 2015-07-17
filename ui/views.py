@@ -145,7 +145,7 @@ class RepositoryView(FacetedSearchView):
     def extra_context(self):
         """Add to the context."""
         context = super(RepositoryView, self).extra_context()
-        vocabularies = Vocabulary.objects.all().values_list("slug", flat=True)
+        vocabularies = Vocabulary.objects.all().values_list("slug", "name")
         params = dict(self.request.GET.copy())
         qs_prefix = "?"
         # Chop out page number so we don't end up with
@@ -164,14 +164,16 @@ class RepositoryView(FacetedSearchView):
             qs_prefix = "?{0}&".format("&".join(qs_prefix))
 
         if "fields" in context["facets"]:
+            _vocabularies = []
+            for k, v in context["facets"]["fields"].items():
+                for vocabulary in vocabularies:
+                    if vocabulary[0] == k:
+                        _vocabularies.append((k, vocabulary[1], v))
+
             context.update({
                 "repo": self.repo,
                 "perms_on_cur_repo": get_perms(self.request.user, self.repo),
-                "vocabularies": {
-                    k: v
-                    for k, v in context["facets"]["fields"].items()
-                    if k in vocabularies
-                },
+                "vocabularies": _vocabularies,
                 "qs_prefix": qs_prefix,
             })
         return context
