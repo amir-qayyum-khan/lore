@@ -153,7 +153,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     'Assert that LearningResourcePanel changes state properly',
     function(assert) {
       var done = assert.async();
-
+      var scrollUpToStatusBox = function() {};
       var afterMount = function(component) {
         // wait for calls to populate form
         waitForAjax(3, function () {
@@ -210,6 +210,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
       };
 
       React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        scrollUpToStatusBox={scrollUpToStatusBox}
         repoSlug="repo"
         learningResourceId="1"
         ref={afterMount} />);
@@ -220,7 +221,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     'Assert that LearningResourcePanel saves properly',
     function(assert) {
       var done = assert.async();
-
+      var scrollUpToStatusBox = function() {};
       var afterMount = function(component) {
         // wait for calls to populate form
         waitForAjax(3, function () {
@@ -228,6 +229,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
 
           var saveButton = $node.find("button")[0];
           React.addons.TestUtils.Simulate.click(saveButton);
+          assert.equal(component.state.message, undefined);
           waitForAjax(1, function() {
             assert.equal(component.state.message,
               "Form saved successfully!");
@@ -237,7 +239,43 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
       };
 
       React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        scrollUpToStatusBox={scrollUpToStatusBox}
         repoSlug="repo"
+        learningResourceId="1"
+        ref={afterMount} />);
+    }
+  );
+  QUnit.test(
+    'Assert that loader on LearningResourcePanel show and hides properly',
+    function(assert) {
+      var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var afterMount = function(component) {
+        // wait for calls to populate form
+        waitForAjax(3, function () {
+          var $node = $(React.findDOMNode(component));
+
+          var saveButton = $node.find("button")[0];
+          React.addons.TestUtils.Simulate.click(saveButton);
+          component.forceUpdate(function () {
+            assert.equal(
+              component.state.showSpinner,
+              true
+            );
+            waitForAjax(1, function() {
+              assert.equal(
+                component.state.showSpinner,
+                false
+              );
+              done();
+            });
+          });
+        });
+      };
+
+      React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        repoSlug="repo"
+        scrollUpToStatusBox={scrollUpToStatusBox}
         learningResourceId="1"
         ref={afterMount} />);
     }
@@ -247,7 +285,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     function(assert) {
       var done = assert.async();
       var thiz = this;
-
+      var scrollUpToStatusBox = function() {};
       var afterMount = function(component) {
         // wait for calls to populate form
         waitForAjax(3, function () {
@@ -272,6 +310,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
       };
 
       React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        scrollUpToStatusBox={scrollUpToStatusBox}
         repoSlug="repo"
         learningResourceId="1"
         ref={afterMount} />);
@@ -283,7 +322,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     'getting learning resource info',
     function(assert) {
       var done = assert.async();
-
+      var scrollUpToStatusBox = function() {};
       TestUtils.replaceMockjax({
         url: '/api/v1/repositories/repo/learning_resources/1/',
         type: 'GET',
@@ -301,6 +340,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
         });
       };
       React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        scrollUpToStatusBox={scrollUpToStatusBox}
         repoSlug="repo"
         learningResourceId="1"
         ref={afterMount} />);
@@ -312,7 +352,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     'getting vocabularies',
     function(assert) {
       var done = assert.async();
-
+      var scrollUpToStatusBox = function() {};
       TestUtils.replaceMockjax({
         url: '/api/v1/repositories/repo/vocabularies/?type_name=course',
         type: 'GET',
@@ -330,6 +370,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
         });
       };
       React.addons.TestUtils.renderIntoDocument(<LearningResourcePanel
+        scrollUpToStatusBox={scrollUpToStatusBox}
         repoSlug="repo"
         learningResourceId="1"
         ref={afterMount} />);
@@ -340,6 +381,7 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
     'Textarea should be selected',
     function(assert) {
       var done = assert.async();
+      var scrollUpToStatusBox = function() {};
       var afterMount = function(component) {
         var $node = $(React.findDOMNode(component));
 
@@ -368,15 +410,17 @@ define(['QUnit', 'jquery', 'reactaddons', 'lodash', 'learning_resources',
 
       React.render(<LearningResourcePanel repoSlug="repo"
         learningResourceId="1"
+        scrollUpToStatusBox={scrollUpToStatusBox}
         ref={afterMount} />, $("#testingDiv")[0]);
     }
   );
   QUnit.test(
     "LearningResourcePanel.loader should populate its stuff",
     function(assert) {
+      var scrollUpToStatusBox = function() {};
       var div = document.createElement("div");
       assert.equal(0, $(div).find("textarea").size());
-      LearningResources.loader("repo", "1", div);
+      LearningResources.loader("repo", "1", scrollUpToStatusBox, div);
       assert.equal(2, $(div).find("textarea").size());
     }
   );

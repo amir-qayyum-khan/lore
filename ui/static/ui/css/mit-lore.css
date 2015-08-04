@@ -515,3 +515,23 @@ ul.repos {
 .dropdown-repository {
     margin-left: 380px;
 }
+
+i.add-vocabulary-spinner-hide {
+    display: none;
+    margin-left: 10px;
+}
+
+i.add-vocabulary-spinner-show {
+    display: inline;
+    margin-left: 10px;
+}
+
+i.lr-spinner-hide {
+    display: none;
+    margin-left: 10px;
+}
+
+i.lr-spinner-show {
+    display: inline;
+    margin-left: 10px;
+}

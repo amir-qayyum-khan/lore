@@ -407,6 +407,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         'vertical', 'html', 'video', 'discussion', 'problem'];
       var saveVocabularyResponse;
       var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var updateParent = function(data) {
         saveVocabularyResponse = data;
       };
@@ -652,12 +654,107 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         renderIntoDocument(
           <AddVocabulary
             vocabularies={vocabularies}
+            scrollUpToStatusBox={scrollUpToStatusBox}
+            switchTabAndScrollDown={switchTabAndScrollDown}
             repoSlug="repo"
             updateParent={updateParent}
             learningResourceTypes={learningResourceTypes}
             ref={afterMount}
           />
         );
+    }
+  );
+
+  QUnit.test('Assert that loader on AddVocabulary works properly',
+    function(assert) {
+      assert.ok(AddVocabulary, "class object not found");
+      var vocabularies = [
+        {
+          "vocabulary": vocabulary,
+          "terms": vocabulary.terms
+        }
+      ];
+      var learningResourceTypes = ['course', 'chapter', 'sequential',
+        'vertical', 'html', 'video', 'discussion', 'problem'];
+      var saveVocabularyResponse;
+      var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
+      var updateParent = function(data) {
+        saveVocabularyResponse = data;
+      };
+      var afterMount = function(component) {
+        var formNode = React.addons.TestUtils.
+          findRenderedDOMComponentWithClass(
+          component,
+          'form-horizontal'
+        );
+        assert.ok(formNode);
+        //test form submission
+        var inputNodes = React.addons.TestUtils.
+          scryRenderedDOMComponentsWithTag(
+          formNode,
+          'input'
+        );
+        assert.equal(inputNodes.length, 13);
+        var inputVocabularyName = inputNodes[0];
+        var inputVocabularyDesc = inputNodes[1];
+        var radioTagStyle = inputNodes[11];
+        var checkMultiTerms = inputNodes[12];
+
+        React.addons.TestUtils.Simulate.change(
+          inputVocabularyName, {target: {value: "TestA"}}
+        );
+        React.addons.TestUtils.Simulate.change(
+          inputVocabularyDesc, {target: {value: "TestA"}}
+        );
+        React.addons.TestUtils.Simulate.change(
+          radioTagStyle,
+          {target: {value: 'f'}}
+        );
+        //change the default multi terms checkbox
+        React.addons.TestUtils.Simulate.change(
+          checkMultiTerms,
+          {target: {checked: true}}
+        );
+        component.forceUpdate(function () {
+          assert.equal(component.state.name, "TestA");
+          assert.equal(component.state.vocabularyType, "f");
+          assert.equal(component.state.description, "TestA");
+          assert.equal(
+            component.state.learningResourceTypes.length,
+            0
+          );
+          //the change to the multi terms is reflected in the state
+          assert.equal(component.state.multiTerms, true);
+          React.addons.TestUtils.Simulate.submit(formNode);
+          component.forceUpdate(function () {
+            assert.equal(
+              component.state.showSpinner,
+              true
+            );
+            waitForAjax(1, function () {
+              //Test loader hides after ajax call finish
+              assert.equal(
+               component.state.showSpinner,
+               false
+              );
+              done();
+            });
+          });
+        });
+      };
+      React.addons.TestUtils.renderIntoDocument(
+        <AddVocabulary
+          vocabularies={vocabularies}
+          scrollUpToStatusBox={scrollUpToStatusBox}
+          switchTabAndScrollDown={switchTabAndScrollDown}
+          repoSlug="repo"
+          updateParent={updateParent}
+          learningResourceTypes={learningResourceTypes}
+          ref={afterMount}
+        />
+      );
     }
   );
 
@@ -672,6 +769,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
       ];
       var done = assert.async();
       var updateParent = function() {};
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var afterMount = function(component) {
         var formNode = React.addons.TestUtils.
           findRenderedDOMComponentWithClass(
@@ -714,6 +813,79 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         renderIntoDocument(
           <AddVocabulary
             vocabularies={vocabularies}
+            scrollUpToStatusBox={scrollUpToStatusBox}
+            switchTabAndScrollDown={switchTabAndScrollDown}
+            repoSlug="repo2"
+            updateParent={updateParent}
+            ref={afterMount}
+          />
+        );
+    }
+  );
+
+  QUnit.test('Assert that loader works when ajax fail AddVocabulary',
+    function(assert) {
+      assert.ok(AddVocabulary, "class object not found");
+      var vocabularies = [
+        {
+          "vocabulary": vocabulary,
+          "terms": vocabulary.terms
+        }
+      ];
+      var done = assert.async();
+      var updateParent = function() {};
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
+      var afterMount = function(component) {
+        var formNode = React.addons.TestUtils.
+          findRenderedDOMComponentWithClass(
+            component,
+            'form-horizontal'
+          );
+        assert.ok(formNode);
+        //test form submission
+        var inputNodes = React.addons.TestUtils.
+          scryRenderedDOMComponentsWithTag(
+            formNode,
+            'input'
+          );
+        assert.equal(inputNodes.length, 5);
+        var inputVocabularyName = inputNodes[0];
+        var inputVocabularyDesc =  inputNodes[1];
+        var checkboxCourse =  inputNodes[2];
+
+        React.addons.TestUtils.Simulate.change(
+          inputVocabularyName, {target: {value: "TestB"}}
+        );
+        React.addons.TestUtils.Simulate.change(
+          inputVocabularyDesc, {target: {value: "TestB"}}
+        );
+        React.addons.TestUtils.Simulate.change(
+          checkboxCourse,
+          {target: {value: 'course', checked: true}}
+        );
+        React.addons.TestUtils.Simulate.submit(formNode);
+        component.forceUpdate(function () {
+          assert.equal(
+            component.state.showSpinner,
+            true
+          );
+          waitForAjax(1, function() {
+            // test loader hides when ajax finish with failure.
+            assert.equal(
+              component.state.showSpinner,
+              false
+            );
+            done();
+          });
+        });
+      };
+      React.addons.TestUtils.
+        renderIntoDocument(
+          <AddVocabulary
+            vocabularies={vocabularies}
+            scrollUpToStatusBox={scrollUpToStatusBox}
+            switchTabAndScrollDown={switchTabAndScrollDown}
             repoSlug="repo2"
             updateParent={updateParent}
             ref={afterMount}
@@ -732,6 +904,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         }
       ];
       var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var updateParent = function() {};
       var afterMount = function(component) {
         var formNode = React.addons.TestUtils.
@@ -777,6 +951,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
       React.addons.TestUtils.
         renderIntoDocument(
           <AddVocabulary
+            scrollUpToStatusBox={scrollUpToStatusBox}
+            switchTabAndScrollDown={switchTabAndScrollDown}
             vocabularies={vocabularies}
             repoSlug="repo3"
             updateParent={updateParent}
@@ -805,6 +981,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         "weight": 2147483647,
       };
       var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var afterMount = function(component) {
         assert.equal(
           component.state.vocabularies.length,
@@ -860,6 +1038,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
       React.addons.TestUtils.renderIntoDocument
       (
         <TaxonomyComponent
+          scrollUpToStatusBox={scrollUpToStatusBox}
+          switchTabAndScrollDown={switchTabAndScrollDown}
           vocabularies={vocabularies}
           repoSlug="repo"
           ref={afterMount}
@@ -886,6 +1066,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
         "weight": 2147483647,
       };
       var done = assert.async();
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var afterMount = function(component) {
         assert.equal(
           component.state.vocabularies.length,
@@ -965,6 +1147,8 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
       (
         <TaxonomyComponent
           vocabularies={vocabularies}
+          scrollUpToStatusBox={scrollUpToStatusBox}
+          switchTabAndScrollDown={switchTabAndScrollDown}
           repoSlug="repo"
           ref={afterMount}
         />
@@ -974,9 +1158,13 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'reactaddons',
 
   QUnit.test("Test that ManageTaxonomies.loader renders into div",
     function(assert) {
+      var scrollUpToStatusBox = function() {};
+      var switchTabAndScrollDown = function() {};
       var container = document.createElement("div");
       assert.equal(0, $(container).find("input").size());
-      ManageTaxonomies.loader("repo", container);
+      ManageTaxonomies.loader(
+        "repo", scrollUpToStatusBox, switchTabAndScrollDown, container
+      );
       assert.equal(5, $(container).find("input").size());
     }
   );

@@ -44,7 +44,11 @@ define('learning_resources', [
     mixins: [React.addons.LinkedStateMixin],
     render: function () {
       var thiz = this;
+      var spinnerClassName = "fa fa-spinner fa-pulse fa-3x lr-spinner-hide";
       var vocabulariesAndTerms = this.state.vocabulariesAndTerms;
+      if (thiz.state.showSpinner) {
+        spinnerClassName = "fa fa-spinner fa-pulse fa-3x lr-spinner-show";
+      }
       var options = _.map(vocabulariesAndTerms, function (pair) {
         var updateTerms = function(vocabSlug, newTermsSlug) {
           var newVocabulariesAndTerms = _.map(vocabulariesAndTerms,
@@ -103,6 +107,7 @@ define('learning_resources', [
                     onClick={this.saveForm}>
               Save
             </button>
+            <i className={spinnerClassName}/>
           </p>
         </form>
       </div>;
@@ -123,6 +128,7 @@ define('learning_resources', [
         terms: terms,
         description: this.state.description
       };
+      this.setState({showSpinner: true});
 
       $.ajax({
         url: "/api/v1/repositories/" + this.props.repoSlug +
@@ -135,11 +141,17 @@ define('learning_resources', [
         thiz.setState({
           message: "Form saved successfully!"
         });
+        thiz.hideLoaderAndScrollUp();
       }).fail(function () {
         thiz.setState({
           message: {error: "Unable to save form"}
         });
+        thiz.hideLoaderAndScrollUp();
       });
+    },
+    hideLoaderAndScrollUp: function() {
+      this.setState({showSpinner: false});
+      this.props.scrollUpToStatusBox();
     },
     componentDidMount: function () {
       var thiz = this;
@@ -210,7 +222,8 @@ define('learning_resources', [
       return {
         contentXml: "",
         description: "",
-        vocabulariesAndTerms: []
+        vocabulariesAndTerms: [],
+        showSpinner: false
       };
     }
   });
@@ -218,12 +231,14 @@ define('learning_resources', [
   return {
     VocabularyOption: VocabularyOption,
     LearningResourcePanel: LearningResourcePanel,
-    loader: function (repoSlug, learningResourceId, container) {
+    loader: function(repoSlug, learningResourceId,
+                     scrollUpToStatusBox,  container) {
       // Unmount and remount the component to ensure that its state
       // is always up to date with the rest of the app.
       React.unmountComponentAtNode(container);
       React.render(<LearningResourcePanel
         repoSlug={repoSlug} learningResourceId={learningResourceId}
+        scrollUpToStatusBox={scrollUpToStatusBox}
         />, container);
     }
   };

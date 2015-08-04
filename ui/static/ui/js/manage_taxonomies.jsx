@@ -149,6 +149,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
         vocabularyType: 'm',
         learningResourceTypes: [],
         multiTerms: false,
+        showSpinner: false
       };
     },
     updateLearningResourceType: function(e) {
@@ -178,6 +179,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
       this.setState({multiTerms: e.target.checked});
     },
     submitForm: function(e) {
+      this.setState({showSpinner: true});
       var API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
         '/vocabularies/';
       e.preventDefault();
@@ -220,24 +222,31 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
             }
           });
         }
+        thiz.hideLoaderAndScrollUp(false);
       }).done(function(data) {
         // Reset state (and eventually update the vocab tab
         thiz.props.updateParent(data);
         thiz.replaceState(thiz.getInitialState());
         // Switch to taxonomy panel and scroll to new vocab (bottom)
-        $('[href=#tab-taxonomies]').tab('show');
-        var scrollableDiv = $(
-          ".cd-panel-2 .cd-panel-container .cd-panel-content"
-        );
-        scrollableDiv.animate(
-          {scrollTop: scrollableDiv.prop('scrollHeight')},
-          500
-        );
+        thiz.hideLoaderAndScrollUp(true);
       });
+    },
+    hideLoaderAndScrollUp: function(switchTab) {
+      this.setState({showSpinner: false});
+      if (switchTab) {
+        this.props.switchTabAndScrollDown();
+      } else {
+        this.props.scrollUpToStatusBox();
+      }
     },
     render: function() {
       var thiz = this;
-
+      var spinnerClassName =
+        "fa fa-spinner fa-pulse fa-3x add-vocabulary-spinner-hide";
+      if (thiz.state.showSpinner) {
+        spinnerClassName =
+          "fa fa-spinner fa-pulse fa-3x add-vocabulary-spinner-show";
+      }
       var checkboxes = _.map(this.props.learningResourceTypes, function(type) {
         var checked = _.includes(thiz.state.learningResourceTypes, type);
         return (
@@ -304,6 +313,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
           </p>
           <p>
             <button className="btn btn-lg btn-primary">Save</button>
+            <i className={spinnerClassName} />
           </p>
         </form>
       );
@@ -350,6 +360,8 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
           <div className="tab-pane drawer-tab-content" id="tab-vocab">
             <AddVocabulary
               updateParent={this.addVocabulary}
+              scrollUpToStatusBox={this.props.scrollUpToStatusBox}
+              switchTabAndScrollDown={this.props.switchTabAndScrollDown}
               learningResourceTypes={this.state.learningResourceTypes}
               repoSlug={this.props.repoSlug}/>
           </div>
@@ -388,9 +400,13 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
     'AddTermsComponent': AddTermsComponent,
     'AddVocabulary': AddVocabulary,
     'TaxonomyComponent': TaxonomyComponent,
-    'loader': function (repoSlug, container) {
+    'loader': function (repoSlug, scrollUpToStatusBoxTaxonomy,
+      switchTabAndScrollDownToTaxonomyPanel, container) {
       React.render(
-        <TaxonomyComponent repoSlug={repoSlug}/>,
+        <TaxonomyComponent repoSlug={repoSlug}
+          scrollUpToStatusBox={scrollUpToStatusBoxTaxonomy}
+          switchTabAndScrollDown={switchTabAndScrollDownToTaxonomyPanel}
+        />,
         container
       );
     }

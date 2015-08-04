@@ -76,6 +76,43 @@ define('listing',
         });
     }
 
+    function scrollUpToStatusBoxLRPanel() {
+      var scrollableDiv = $(".cd-panel .cd-panel-container .cd-panel-content");
+      var messageBox = $('.alert-dismissible');
+
+      if (messageBox !== undefined) {
+        scrollableDiv.animate(
+          {scrollTop: messageBox.offset().top},
+          500
+        );
+      }
+    }
+
+    function scrollUpToStatusBoxTaxonomy() {
+      var scrollableDiv = $(
+        ".cd-panel-2 .cd-panel-container .cd-panel-content"
+      );
+      var messageBox = $('.alert-dismissible');
+      if (messageBox !== undefined) {
+        scrollableDiv.animate(
+          {scrollTop: messageBox.offset().top},
+          500
+        );
+      }
+    }
+
+    function switchTabAndScrollDownToTaxonomyPanel() {
+      var scrollableDiv = $(
+        ".cd-panel-2 .cd-panel-container .cd-panel-content"
+      );
+
+      $('[href=#tab-taxonomies]').tab('show');
+      scrollableDiv.animate(
+        {scrollTop: scrollableDiv.prop('scrollHeight')},
+        500
+      );
+    }
+
     $(document).ready(function() {
 
       $('[data-toggle=popover]').popover();
@@ -97,14 +134,19 @@ define('listing',
           event.preventDefault();
         }
       });
+
       //open the lateral panel
       $('.cd-btn').on('click', function(event) {
         event.preventDefault();
         var learningResourceId = $(event.target).attr(
           "data-learningresource-id");
-        LearningResources.loader(repoSlug, learningResourceId, $("#tab-1")[0]);
+        LearningResources.loader(
+          repoSlug, learningResourceId, scrollUpToStatusBoxLRPanel,
+          $("#tab-1")[0]
+        );
         $('.cd-panel').addClass('is-visible');
         StaticAssets.loader(repoSlug, learningResourceId, $("#tab-3")[0]);
+        $('body').css('overflow', 'hidden');
       });
 
       //close the lateral panel
@@ -112,6 +154,7 @@ define('listing',
         if ($(event.target).is('.cd-panel') ||
             $(event.target).is('.cd-panel-close')) {
           $('.cd-panel').removeClass('is-visible');
+          $('body').css('overflow', 'scroll');
           event.preventDefault();
         }
       });
@@ -119,6 +162,7 @@ define('listing',
       //open the lateral panel
       $('.btn-taxonomies').on('click', function(event) {
         event.preventDefault();
+        $('body').css('overflow', 'hidden');
         $('.cd-panel-2').addClass('is-visible');
       });
 
@@ -127,6 +171,7 @@ define('listing',
         if ($(event.target).is('.cd-panel-2') ||
             $(event.target).is('.cd-panel-close')) {
           $('.cd-panel-2').removeClass('is-visible');
+          $('body').css('overflow', 'scroll');
           event.preventDefault();
         }
       });
@@ -335,6 +380,12 @@ define('listing',
       });
 
       var repoSlug = $("#repo_slug").val();
-      manageTaxonomies.loader(repoSlug, $('#taxonomy-component')[0]);
+      manageTaxonomies.loader(
+        repoSlug,
+        scrollUpToStatusBoxTaxonomy,
+        switchTabAndScrollDownToTaxonomyPanel,
+        $('#taxonomy-component')[0]
+      );
     });
+
   });
