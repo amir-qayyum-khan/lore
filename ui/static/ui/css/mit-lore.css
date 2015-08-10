@@ -6,6 +6,7 @@
 
 *::after, *::before {
     content: '';
+    content: none;  /* for chrome and safari */
 }
 
 body {
