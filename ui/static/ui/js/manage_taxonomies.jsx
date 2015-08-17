@@ -31,7 +31,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
             <h4 className="panel-title">
               <span className="utility-features">
                 <a href="#">
-                  <i className="fa fa-pencil"></i>
+                  <i className="fa fa-pencil" onClick={this.onEdit}></i>
                 </a> <a href="#">
                   <i className="fa fa-remove"></i>
                 </a>
@@ -67,6 +67,9 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
             </div>
           </div>
       </div>;
+    },
+    onEdit: function() {
+      this.props.editVocabulary(this.props.vocabulary);
     },
     onKeyUp: function(e) {
       if (e.key === "Enter") {
@@ -115,6 +118,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
       var items = _.map(this.props.vocabularies, function (obj) {
         return <VocabularyComponent
           vocabulary={obj.vocabulary}
+          editVocabulary={thiz.props.editVocabulary}
           terms={obj.terms}
           key={obj.vocabulary.slug}
           repoSlug={repoSlug}
@@ -149,11 +153,11 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
         vocabularyType: 'm',
         learningResourceTypes: [],
         multiTerms: false,
+        slug: ''
       };
     },
     updateLearningResourceType: function(e) {
       var checkedType = e.target.value;
-
       var newTypes;
       if (e.target.checked) {
         if (!_.includes(this.state.learningResourceTypes, checkedType)) {
@@ -178,8 +182,16 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
       this.setState({multiTerms: e.target.checked});
     },
     submitForm: function(e) {
-      var API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
+      var API_ROOT_VOCAB_URL;
+      var method = "POST";
+      if (this.state.slug) {
+        API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
+        '/vocabularies/' + this.state.slug;
+        method = "PUT";
+      } else {
+        API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
         '/vocabularies/';
+      }
       e.preventDefault();
       var thiz = this;
       var vocabularyData = {
@@ -193,7 +205,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
       };
 
       $.ajax({
-        type: "POST",
+        type: method,
         url: API_ROOT_VOCAB_URL,
         data: JSON.stringify(vocabularyData),
         contentType: "application/json"
@@ -214,30 +226,64 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
             }
           }
         } else {
+          var message = 'There was a problem adding the Vocabulary.';
+          if (thiz.isEditModeOpen()) {
+            message = 'There was a problem with updating the Vocabulary.';
+          }
           thiz.setState({
             message: {
-              error: 'There was a problem adding the Vocabulary.'
+              error: message
             }
           });
         }
       }).done(function(data) {
         // Reset state (and eventually update the vocab tab
+        var isEditMode = thiz.isEditModeOpen();
         thiz.props.updateParent(data);
-        thiz.replaceState(thiz.getInitialState());
-        // Switch to taxonomy panel and scroll to new vocab (bottom)
-        $('[href=#tab-taxonomies]').tab('show');
-        var scrollableDiv = $(
-          ".cd-panel-2 .cd-panel-container .cd-panel-content"
-        );
-        scrollableDiv.animate(
-          {scrollTop: scrollableDiv.prop('scrollHeight')},
-          500
-        );
+        thiz.resetFrom();
+        if (!isEditMode) {
+          var scrollableDiv = $(
+           ".cd-panel-2 .cd-panel-container .cd-panel-content"
+          );
+          scrollableDiv.animate(
+            {scrollTop: scrollableDiv.prop('scrollHeight')},
+            500
+          );
+        }
       });
+    },
+    isEditModeOpen: function() {
+      var isEditMode = false;
+      if (this.state.slug) {
+        isEditMode = true;
+      }
+      return isEditMode;
+    },
+    resetFrom: function() {
+      this.replaceState(this.getInitialState());
+      this.props.editVocabulary(undefined); //reset vocabulary in edit mode
+    },
+    componentWillReceiveProps: function(nextProps) {
+      if (nextProps.vocabulary) {
+        this.setState({
+          name: nextProps.vocabulary.name,
+          description: nextProps.vocabulary.description,
+          vocabularyType: nextProps.vocabulary.vocabulary_type,
+          learningResourceTypes: nextProps.vocabulary.learning_resource_types,
+          multiTerms: nextProps.vocabulary.multi_terms,
+          slug: nextProps.vocabulary.slug,
+        });
+      }
     },
     render: function() {
       var thiz = this;
+      var cancelBtnClass = "btn btn-lg btn-primary hide-vocab-cancel";
+      var submitButtonText = "Save";
 
+      if (this.props.vocabulary) {
+        cancelBtnClass = "btn btn-lg btn-primary show-vocab-cancel";
+        submitButtonText = "Update";
+      }
       var checkboxes = _.map(this.props.learningResourceTypes, function(type) {
         var checked = _.includes(thiz.state.learningResourceTypes, type);
         return (
@@ -255,7 +301,7 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
       });
 
       return (
-        <form className="form-horizontal" onSubmit={this.submitForm}>
+        <form className="form-horizontal">
           <StatusBox message={this.state.message} />
           <p>
             <input type="text" valueLink={this.linkState('name')}
@@ -303,7 +349,10 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
             </div>
           </p>
           <p>
-            <button className="btn btn-lg btn-primary">Save</button>
+            <button className="btn btn-lg btn-primary"
+                    onClick={this.submitForm}>{submitButtonText}
+            </button>  <button className={cancelBtnClass}
+                               onClick={this.resetFrom}>Cancel</button>
           </p>
         </form>
       );
@@ -314,17 +363,35 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
     getInitialState: function() {
       return {
         vocabularies: [],
-        learningResourceTypes: []
+        learningResourceTypes: [],
+        vocabularyInEdit: undefined
       };
+    },
+    editVocabulary: function(vocab) {
+      this.setState({vocabularyInEdit: vocab});
+      if (vocab) {
+        $('[href=#tab-vocab]').tab('show');
+      } else {
+        $('[href=#tab-taxonomies]').tab('show');
+      }
     },
     addVocabulary: function(vocab) {
       // Wrap vocab in expected structure
-      var newVocab = {
-        terms: [],
-        vocabulary: vocab
-      };
+      var editIndex = -1;
       var vocabularies = this.state.vocabularies;
-      this.setState({vocabularies: vocabularies.concat([newVocab])});
+      editIndex = _.findIndex(vocabularies, function(vocabularyObj) {
+        return vocabularyObj.vocabulary.slug === vocab.slug;
+      });
+      if (editIndex > -1) {
+        vocabularies[editIndex].vocabulary = vocab;
+        this.setState({vocabularies: vocabularies});
+      } else {
+        var newVocab = {
+          terms: [],
+          vocabulary: vocab
+        };
+        this.setState({vocabularies: vocabularies.concat([newVocab])});
+      }
     },
     addTerm: function(vocabSlug, newTerm) {
       var vocabularies = _.map(this.state.vocabularies, function(tuple) {
@@ -343,13 +410,16 @@ define('manage_taxonomies', ['reactaddons', 'lodash', 'jquery', 'utils'],
         <div className="tab-content drawer-tab-content">
           <div className="tab-pane active" id="tab-taxonomies">
             <AddTermsComponent
+              editVocabulary={this.editVocabulary}
               vocabularies={this.state.vocabularies}
               repoSlug={this.props.repoSlug}
               addTerm={this.addTerm} />
           </div>
           <div className="tab-pane drawer-tab-content" id="tab-vocab">
             <AddVocabulary
+              editVocabulary={this.editVocabulary}
               updateParent={this.addVocabulary}
+              vocabulary={this.state.vocabularyInEdit}
               learningResourceTypes={this.state.learningResourceTypes}
               repoSlug={this.props.repoSlug}/>
           </div>

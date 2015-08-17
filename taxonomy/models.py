@@ -50,8 +50,7 @@ class Vocabulary(BaseModel):
     @transaction.atomic
     def save(self, *args, **kwargs):
         """Handle slugs."""
-        if self.id is None or self.name != get_object_or_404(
-                Vocabulary, id=self.id).name:
+        if self.id is None:
             slug = slugify(self.name)
             count = 1
             while Vocabulary.objects.filter(slug=slug).exists():

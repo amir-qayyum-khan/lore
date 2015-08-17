@@ -95,6 +95,7 @@ class ViewTermPermission(BasePermission):
 
 class ManageTaxonomyPermission(BasePermission):
     """Checks manage_taxonomy permission"""
+    SAFE_METHODS_CUSTOM = ('GET', 'HEAD', 'OPTIONS', 'PUT')
 
     def has_permission(self, request, view):
         # verify repo just in case we haven't done this earlier
@@ -105,7 +106,7 @@ class ManageTaxonomyPermission(BasePermission):
         except PermissionDenied:
             return False
 
-        if request.method in SAFE_METHODS:
+        if request.method in self.SAFE_METHODS_CUSTOM:
             return True
         else:
             repo_slug = view.kwargs['repo_slug']

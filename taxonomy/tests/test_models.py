@@ -33,4 +33,4 @@ class TestModels(LoreTestCase):
         vocab.name = "vocab name"
         vocab.save()
         self.assertEqual(vocab.name, "vocab name")
-        self.assertEqual(vocab.slug, "vocab-name")
+        self.assertEqual(vocab.slug, "vocabname")

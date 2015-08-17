@@ -514,3 +514,11 @@ ul.repos {
 .dropdown-repository {
     margin-left: 380px;
 }
+
+.hide-vocab-cancel {
+    display: none;
+}
+
+.show-vocab-cancel {
+    display: inline;
+}

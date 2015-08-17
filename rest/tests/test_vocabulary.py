@@ -658,7 +658,7 @@ class TestVocabularyAuthorization(RESTAuthTestCase):
                               expected_status=HTTP_403_FORBIDDEN)
         self.put_vocabulary(self.repo.slug, vocab_slug,
                             self.DEFAULT_VOCAB_DICT,
-                            expected_status=HTTP_403_FORBIDDEN)
+                            expected_status=HTTP_200_OK)
 
         # make sure at least view_repo is needed
         self.logout()
