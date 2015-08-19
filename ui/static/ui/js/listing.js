@@ -76,7 +76,62 @@ define('listing',
         });
     }
 
+    function navigateToPage(pageNum, maxPages, callerElem) {
+      var replaceWith = $(
+        '<input name="search_temp" type="text" ' +
+          'value="' + pageNum + '" size="10" ' +
+        'class="form-control repo-page-status"/>'
+      );
+      var callerSelector = $(callerElem);
+
+      callerSelector.hide();
+      callerSelector.after(replaceWith);
+      replaceWith.focus();
+      $(replaceWith).focusout(function() {
+        processPage(
+            pageNum,
+            maxPages,
+            replaceWith,
+            callerSelector
+          );
+      });
+      $(replaceWith).keypress(function (e) {
+       var key = e.which;
+        // the enter key code
+       if(key == 13) {
+         e.preventDefault();
+          processPage(
+            pageNum,
+            maxPages,
+            replaceWith,
+            callerSelector
+          );
+        }
+      });
+    }
+
+    function processPage(pageNum, maxPages, replaceWith, callerSelector) {
+       var newPageNum = replaceWith.val();
+        replaceWith.remove();
+        if (newPageNum !== pageNum && newPageNum > 0 && newPageNum <= maxPages) {
+          var url = $(location).attr('href').replace(
+            "page=" + pageNum,
+            "page=" + newPageNum
+          );
+          $(location).attr(
+            'href',
+            url
+          );
+        }
+        callerSelector.show();
+    }
+
     $(document).ready(function() {
+      $("a#repo_page_status").click(function() {
+        var pageNum = $(this).data('page-num');
+        var maxPages = $(this).data('max-page-num');
+        navigateToPage(pageNum, maxPages, this);
+      });
 
       $('[data-toggle=popover]').popover();
       //Close panels on escape keypress
