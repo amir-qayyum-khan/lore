@@ -563,10 +563,6 @@ input.repo-page-status {
     display: inline;
 }
 
-.modal-hide {
-    display: none;
-}
-
 .modal-dialog {
     position: absolute;
     right: 0;

@@ -365,7 +365,6 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
       if (vocab && confirmationDialogId) {
         this.setState({vocabularyToDelete: vocab});
         var options = {
-          confirmationDialogHide: false,
           confirmationDialogId: confirmationDialogId,
           confirmationDialogActionButtonName: "Delete",
           confirmationDialogTitle: "Confirm Delete",

@@ -116,7 +116,13 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
   });
 
   /**
+   * Generic confirmation dialog.
    *
+   * @param {String} id - Bootstrap dialog id
+   * @param {String} actionButtonName - Name of action button can be any of delete, remove, ok etc
+   * @param {String} title - Title/heading of confirmation dialog
+   * @param {String} message - Content of dialog
+   * @callback confirmationSuccess - Call back gives confirmation status
   */
   var ConfirmationDialog =  React.createClass({
     render: function() {
@@ -138,10 +144,6 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
 
       if (this.props.title) {
         title = <h4 className="modal-title">{this.props.title}</h4>;
-      }
-
-      if (this.props.hide) {
-        className = "modal fade modal-hide";
       }
 
       return (
@@ -329,7 +331,6 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
     showConfirmationDialog: function(options, containter) {
       React.render(
         <ConfirmationDialog
-          hide={options.confirmationDialogHide}
           id={options.confirmationDialogId}
           actionButtonName={options.confirmationDialogActionButtonName}
           title={options.confirmationDialogTitle}
