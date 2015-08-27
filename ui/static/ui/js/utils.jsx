@@ -116,13 +116,26 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
   });
 
   /**
+  * Callback to send confirmation status.
+  *
+  * @callback confirmationResponse - Call back that sends confirmation status
+  * @param {bool} status - Confirmation status
+  */
+
+  /**
    * Generic confirmation dialog.
+   * <ConfirmationDialog
+   *       id={confirmationDialogId}
+   *       actionButtonName={confirmationDialogActionButtonName}
+   *       title={confirmationDialogTitle}
+   *       message={confirmationDialogMessage}
+   *       confirmationSuccess={confirmationSuccess} />,
    *
    * @param {String} id - Bootstrap dialog id
    * @param {String} actionButtonName - Name of action button can be any of delete, remove, ok etc
    * @param {String} title - Title/heading of confirmation dialog
    * @param {String} message - Content of dialog
-   * @callback confirmationSuccess - Call back gives confirmation status
+   * @param {confirmationResponse} confirmationSuccess - Call back that sends confirmation status
   */
   var ConfirmationDialog =  React.createClass({
     render: function() {
@@ -175,7 +188,7 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
     },
     confirmationFailure: function() {
       this.props.confirmationSuccess(false);
-    },
+    }
   });
 
   /**
