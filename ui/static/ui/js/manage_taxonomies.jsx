@@ -72,9 +72,6 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
     onDelete: function() {
       this.props.deleteVocabulary(this.props.vocabulary, "confirm-delete");
     },
-    onEdit: function() {
-      this.props.editVocabulary(this.props.vocabulary);
-    },
     onKeyUp: function(e) {
       if (e.key === "Enter") {
         this.handleAddTermClick();
@@ -122,7 +119,6 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
       var items = _.map(this.props.vocabularies, function (obj) {
         return <VocabularyComponent
           vocabulary={obj.vocabulary}
-          editVocabulary={thiz.props.editVocabulary}
           deleteVocabulary={thiz.props.deleteVocabulary}
           terms={obj.terms}
           key={obj.vocabulary.slug}
@@ -323,16 +319,9 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
     getInitialState: function() {
       return {
         vocabularies: [],
-        learningResourceTypes: []
+        learningResourceTypes: [],
+        vocabularyToDelete: undefined
       };
-    },
-    editVocabulary: function(vocab) {
-      this.setState({vocabularyInEdit: vocab});
-      if (vocab) {
-        $('[href=#tab-vocab]').tab('show');
-      } else {
-        $('[href=#tab-taxonomies]').tab('show');
-      }
     },
     confirmationDeleteResponse: function(status) {
       var vocab = this.state.vocabularyToDelete;
@@ -347,7 +336,7 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
           contentType: "application/json"
         }).fail(function(data) {
           console.log("Delete vocabulary fail", data);
-        }).done(function(data) {
+        }).done(function() {
           var editIndex = -1;
           var vocabularies = thiz.state.vocabularies;
           editIndex = _.findIndex(vocabularies, function(vocabularyObj) {
@@ -362,7 +351,7 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
       }
     },
     deleteVocabulary: function(vocab, confirmationDialogId) {
-      if (vocab && confirmationDialogId) {
+      if (this.isMounted() && vocab && confirmationDialogId) {
         this.setState({vocabularyToDelete: vocab});
         var options = {
           confirmationDialogId: confirmationDialogId,
@@ -405,7 +394,6 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
               vocabularies={this.state.vocabularies}
               repoSlug={this.props.repoSlug}
               deleteVocabulary={this.deleteVocabulary}
-              editVocabulary={this.editVocabulary}
               addTerm={this.addTerm} />
           </div>
           <div className="tab-pane drawer-tab-content" id="tab-vocab">

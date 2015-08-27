@@ -181,6 +181,13 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'react',
         dataType: 'json',
         type: "GET"
       });
+      TestUtils.initMockjax({
+        url: "/api/v1/repositories/repo/vocabularies/" + vocabulary.slug,
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json',
+        responseText: {message: "ok"},
+        type: "DELETE"
+      });
     },
     afterEach: function() {
       TestUtils.cleanup();
@@ -966,6 +973,60 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'react',
         <TaxonomyComponent
           vocabularies={vocabularies}
           repoSlug="repo"
+          ref={afterMount}
+        />
+      );
+    }
+  );
+
+  QUnit.test('Assert that delete vocabulary works in TaxonomyComponent',
+    function(assert) {
+      assert.ok(TaxonomyComponent, "class object not found");
+      var done = assert.async();
+      var userSelectedConfirm = 0;
+      var showConfirmationDialog = function (options) {
+        options.confirmationSuccess(true);
+        userSelectedConfirm += 1;
+      };
+
+      var afterMount = function(component) {
+        waitForAjax(2, function() {
+          assert.equal(
+            component.state.vocabularies.length,
+            1
+          );
+          var buttons = React.addons.TestUtils.
+          scryRenderedDOMComponentsWithClass(
+            component,
+            'fa-remove'
+          );
+          var deleteVocabularyButton = buttons[0];
+          React.addons.TestUtils.Simulate.click(deleteVocabularyButton);
+          component.forceUpdate(function() {
+            assert.equal(
+              component.state.vocabularyToDelete.id,
+              component.state.vocabularies[0].vocabulary.id
+            );
+            waitForAjax(1, function() {
+              assert.equal(userSelectedConfirm, 1);
+              assert.equal(
+                component.state.vocabularyToDelete,
+                undefined
+              );
+              assert.equal(
+                component.state.vocabularies.length,
+                0
+              );
+              done();
+            });
+          });
+        });
+      };
+      React.addons.TestUtils.renderIntoDocument
+      (
+        <TaxonomyComponent
+          repoSlug="repo"
+          showConfirmationDialog={showConfirmationDialog}
           ref={afterMount}
         />
       );

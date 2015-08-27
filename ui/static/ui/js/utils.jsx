@@ -164,7 +164,8 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                <button type="button" className="close"
+                   data-dismiss="modal">&times;</button>
                 {title}
               </div>
               <div className="modal-body">
@@ -172,11 +173,11 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-default"
-                   data-dismiss="modal"
-                   onClick={this.confirmationFailure}>Cancel</button>
-                <button className="btn btn-danger btn-ok"
-                    data-dismiss="modal"
-                    onClick={this.confirmationSuccess}>{actionButtonName}</button>
+                  data-dismiss="modal"
+                  onClick={this.confirmationFailure}>Cancel</button>
+                <button className="btn btn-danger btn-ok" data-dismiss="modal"
+                  onClick={this.confirmationSuccess}
+                >{actionButtonName}</button>
               </div>
             </div>
           </div>

@@ -414,9 +414,16 @@ define('listing',
         }
       });
       var showConfirmationDialog = function(options) {
-        Utils.showConfirmationDialog(options, $("#confirmation-container")[0]);
+        Utils.showConfirmationDialog(
+          options,
+          $("#confirmation-container")[0]
+        );
       };
       var repoSlug = $("#repo_slug").val();
-      manageTaxonomies.loader(repoSlug, $('#taxonomy-component')[0], showConfirmationDialog);
+      manageTaxonomies.loader(
+        repoSlug,
+        $('#taxonomy-component')[0],
+        showConfirmationDialog
+      );
     });
   });
