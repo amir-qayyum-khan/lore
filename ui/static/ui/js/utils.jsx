@@ -116,6 +116,67 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
   });
 
   /**
+   *
+  */
+  var ConfirmationDialog =  React.createClass({
+    render: function() {
+      if (!this.props || !this.props.message) {
+        return null;
+      }
+      var className = "modal fade";
+      var actionButtonName = "Confirm";
+      var id = "confirm-box";
+      var title = "";
+
+      if (this.props.actionButtonName) {
+        actionButtonName = this.props.actionButtonName;
+      }
+
+      if (this.props.id) {
+        id = this.props.id;
+      }
+
+      if (this.props.title) {
+        title = <h4 className="modal-title">{this.props.title}</h4>;
+      }
+
+      if (this.props.hide) {
+        className = "modal fade modal-hide";
+      }
+
+      return (
+        <div className={className} id={id}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal">&times;</button>
+                {title}
+              </div>
+              <div className="modal-body">
+                <p>{this.props.message}</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default"
+                   data-dismiss="modal"
+                   onClick={this.confirmationFailure}>Cancel</button>
+                <button className="btn btn-danger btn-ok"
+                    data-dismiss="modal"
+                    onClick={this.confirmationSuccess}>{actionButtonName}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    },
+    confirmationSuccess: function() {
+      this.props.confirmationSuccess(true);
+    },
+    confirmationFailure: function() {
+      this.props.confirmationSuccess(false);
+    },
+  });
+
+  /**
    * Component for checkboxes using ICheckbox and integrating with React
    * appropriately.
    */
@@ -264,6 +325,18 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
     StatusBox: StatusBox,
     ICheckbox: ICheckbox,
     Select2: Select2,
-    InfiniteList: InfiniteList
+    InfiniteList: InfiniteList,
+    showConfirmationDialog: function(options, containter) {
+      React.render(
+        <ConfirmationDialog
+          hide={options.confirmationDialogHide}
+          id={options.confirmationDialogId}
+          actionButtonName={options.confirmationDialogActionButtonName}
+          title={options.confirmationDialogTitle}
+          message={options.confirmationDialogMessage}
+          confirmationSuccess={options.confirmationSuccess} />,
+        containter
+      );
+    }
   };
 });

@@ -33,7 +33,8 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
                 <a href="#">
                   <i className="fa fa-pencil"></i>
                 </a> <a href="#">
-                  <i className="fa fa-remove" onClick={this.onDelete}></i>
+                  <i className="fa fa-remove" onClick={this.onDelete}
+                    data-toggle="modal" data-target="#confirm-delete" />
                 </a>
               </span> <a className="accordion-toggle vocab-title"
                          data-toggle="collapse"
@@ -69,7 +70,7 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
       </div>;
     },
     onDelete: function() {
-      this.props.deleteVocabulary(this.props.vocabulary);
+      this.props.deleteVocabulary(this.props.vocabulary, "confirm-delete");
     },
     onEdit: function() {
       this.props.editVocabulary(this.props.vocabulary);
@@ -333,15 +334,13 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
         $('[href=#tab-taxonomies]').tab('show');
       }
     },
-    deleteVocabulary: function(vocab) {
-      var API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
-        '/vocabularies/' + vocab.slug;
+    confirmationDeleteResponse: function(status) {
+      var vocab = this.state.vocabularyToDelete;
       var method = "DELETE";
-      var shouldDelete = confirm(
-        "Are you sure you want to delete '" + vocab.name + "'."
-      );
       var thiz = this;
-      if (shouldDelete) {
+      if (status && vocab) {
+        var API_ROOT_VOCAB_URL = '/api/v1/repositories/' + this.props.repoSlug +
+        '/vocabularies/' + vocab.slug;
         $.ajax({
           type: method,
           url: API_ROOT_VOCAB_URL,
@@ -358,7 +357,24 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
             vocabularies.splice(editIndex, 1);
             thiz.setState({vocabularies: vocabularies});
           }
+          thiz.setState({vocabularyToDelete: undefined});
         });
+      }
+    },
+    deleteVocabulary: function(vocab, confirmationDialogId) {
+      if (vocab && confirmationDialogId) {
+        this.setState({vocabularyToDelete: vocab});
+        var options = {
+          confirmationDialogHide: false,
+          confirmationDialogId: confirmationDialogId,
+          confirmationDialogActionButtonName: "Delete",
+          confirmationDialogTitle: "Confirm Delete",
+          confirmationDialogMessage:
+          "Are you sure you want to delete vocabulary" +
+          " '" +  vocab.name + "'.",
+          confirmationSuccess: this.confirmationDeleteResponse
+        };
+        this.props.showConfirmationDialog(options);
       }
     },
     addVocabulary: function(vocab) {
@@ -434,9 +450,10 @@ define('manage_taxonomies', ['react', 'lodash', 'jquery', 'utils'],
     'AddTermsComponent': AddTermsComponent,
     'AddVocabulary': AddVocabulary,
     'TaxonomyComponent': TaxonomyComponent,
-    'loader': function (repoSlug, container) {
+    'loader': function (repoSlug, container, showConfirmationDialog) {
       React.render(
-        <TaxonomyComponent repoSlug={repoSlug}/>,
+        <TaxonomyComponent repoSlug={repoSlug}
+          showConfirmationDialog={showConfirmationDialog}/>,
         container
       );
     }
