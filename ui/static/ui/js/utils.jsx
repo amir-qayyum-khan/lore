@@ -138,34 +138,47 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
    * @param {confirmationResponse} confirmationSuccess - Call back that sends confirmation status
   */
   var ConfirmationDialog =  React.createClass({
+    getInitialState: function() {
+      return {
+        id: 'confirm-box',
+        className: 'modal fade',
+        actionButtonName: 'Confirm',
+        actionButtonClass: 'btn btn-ok'
+      };
+    },
+    componentWillMount: function() {
+      if (this.props.actionButtonName) {
+        this.setState({actionButtonName: this.props.actionButtonName});
+      }
+
+      if (this.props.actionButtonClass) {
+        this.setState({actionButtonClass: this.props.actionButtonClass});
+      }
+
+      if (this.props.id) {
+        this.setState({id: this.props.id});
+      }
+
+      if (this.props.className) {
+        this.setState({className: this.props.className});
+      }
+    },
     render: function() {
       if (!this.props || !this.props.message) {
         return null;
       }
-      var className = "modal fade";
-      var actionButtonName = "Confirm";
-      var id = "confirm-box";
-      var title = "";
-
-      if (this.props.actionButtonName) {
-        actionButtonName = this.props.actionButtonName;
-      }
-
-      if (this.props.id) {
-        id = this.props.id;
-      }
-
+      var title = '';
       if (this.props.title) {
         title = <h4 className="modal-title">{this.props.title}</h4>;
       }
 
       return (
-        <div className={className} id={id}>
+        <div className={this.state.className} id={this.state.id}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <button type="button" className="close"
-                   data-dismiss="modal">&times;</button>
+                   data-dismiss="modal"><i className="fa fa-remove"/></button>
                 {title}
               </div>
               <div className="modal-body">
@@ -175,14 +188,18 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
                 <button type="button" className="btn btn-default"
                   data-dismiss="modal"
                   onClick={this.confirmationFailure}>Cancel</button>
-                <button className="btn btn-danger btn-ok" data-dismiss="modal"
+                <button className={this.state.actionButtonClass}
+                  data-dismiss="modal"
                   onClick={this.confirmationSuccess}
-                >{actionButtonName}</button>
+                >{this.state.actionButtonName}</button>
               </div>
             </div>
           </div>
         </div>
       );
+    },
+    componentDidMount : function() {
+      $("#" + this.state.id).modal('show');
     },
     confirmationSuccess: function() {
       this.props.confirmationSuccess(true);
@@ -345,6 +362,7 @@ define("utils", ["jquery", "lodash", "react", "react_infinite", "select2"],
     showConfirmationDialog: function(options, containter) {
       React.render(
         <ConfirmationDialog
+          actionButtonClass={options.actionButtonClass}
           id={options.confirmationDialogId}
           actionButtonName={options.confirmationDialogActionButtonName}
           title={options.confirmationDialogTitle}

@@ -414,9 +414,10 @@ define('listing',
         }
       });
       var showConfirmationDialog = function(options) {
+        var container = $("#confirmation-container")[0];
         Utils.showConfirmationDialog(
           options,
-          $("#confirmation-container")[0]
+          container
         );
       };
       var repoSlug = $("#repo_slug").val();

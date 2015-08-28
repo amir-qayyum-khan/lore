@@ -181,13 +181,6 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'react',
         dataType: 'json',
         type: "GET"
       });
-      TestUtils.initMockjax({
-        url: "/api/v1/repositories/repo/vocabularies/" + vocabulary.slug,
-        contentType: "application/json; charset=utf-8",
-        dataType: 'json',
-        responseText: {message: "ok"},
-        type: "DELETE"
-      });
     },
     afterEach: function() {
       TestUtils.cleanup();
@@ -989,18 +982,27 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'react',
         userSelectedConfirm += 1;
       };
 
+      TestUtils.initMockjax({
+        url: "/api/v1/repositories/repo/vocabularies/" + vocabulary.slug,
+        type: "DELETE"
+      });
+
       var afterMount = function(component) {
         waitForAjax(2, function() {
           assert.equal(
             component.state.vocabularies.length,
             1
           );
-          var buttons = React.addons.TestUtils.
+          var actionButtons = React.addons.TestUtils.
           scryRenderedDOMComponentsWithClass(
             component,
-            'fa-remove'
+            'delete-vocabulary'
           );
-          var deleteVocabularyButton = buttons[0];
+          assert.equal(
+            component.state.vocabularyToDelete,
+            undefined
+          );
+          var deleteVocabularyButton = actionButtons[0];
           React.addons.TestUtils.Simulate.click(deleteVocabularyButton);
           component.forceUpdate(function() {
             assert.equal(
@@ -1026,7 +1028,7 @@ define(['QUnit', 'jquery', 'manage_taxonomies', 'react',
       (
         <TaxonomyComponent
           repoSlug="repo"
-          showConfirmationDialog={showConfirmationDialog}
+          renderConfirmationDialog={showConfirmationDialog}
           ref={afterMount}
         />
       );
